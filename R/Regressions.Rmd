@@ -1,0 +1,100 @@
+---
+title: "Regression Examples"
+date: "`r Sys.Date()`"
+author: "Harm"
+output:
+  rmdformats::robobook:
+    highlight: kate
+---
+
+## Setup
+
+```{r setup}
+library(tidyverse)
+library(fixest)
+```
+
+## Data
+
+```{r}
+trade <- haven::read_dta("../data/trade.dta")
+glimpse(trade)
+```
+
+```{r}
+head(trade)
+```
+
+
+
+## Regression examples
+
+```{r}
+m1 <- feols(log(Euros) ~ log(dist_km) | Origin + Destination + Product + Year, data = trade)
+summary(m1, vcov = ~ Origin + Year)
+```
+
+```{r}
+m2 <- feols(
+  log(Euros) ~ log(dist_km) | Origin + Destination + Product + Year, 
+  data = trade,
+  vcov = ~Origin + Destination
+  )
+```
+
+
+```{r}
+etable(m1, m2) 
+```
+
+```{r}
+model_list <- list()
+all_FEs  <- c("Year", "Destination", "Origin")
+for (i in 0:3){
+  model_list[[i+1]] <- feols(log(Euros) ~ log(dist_km),
+                             data = trade,
+                             fixef = all_FEs[0:i])
+}
+etable(model_list, cluster =  ~Origin + Destination)
+```
+
+
+
+## Nesting and Regressions
+
+```{r}
+fit_model <- function(dta) {
+  fit <- feols(
+    log(Euros) ~ log(dist_km) | Origin + Destination + Product, 
+    data = dta
+    )
+  return(fit)
+}
+
+nested_by_year <- 
+  trade |> 
+  nest(data = -Year) |> 
+  mutate(fit = map(data, fit_model)) |> 
+  mutate(preds = map2(fit, data, \(x, y) predict(x, y)))
+```
+
+```{r}
+head(nested_by_year)
+```
+
+
+```{r}
+nested_by_year$fit[[2]]
+```
+
+```{r}
+test <- 
+  nested_by_year |> 
+  select(-fit) |> 
+  unnest(c(data, preds)) |> 
+  mutate(predicted_Euros = exp(preds))
+
+head(test)
+```
+
+
