@@ -12,17 +12,40 @@ output:
 ```{r setup}
 library(tidyverse)
 library(RPostgres)
+library(dbplyr)
 library(ggridges)
 ```
 
 
 
-## Load data
+## The gramma of data manipulation
 
-```{r}
-# compustat_sample <- haven::read_stata("")
+image [source](http://perso.ens-lyon.fr/lise.vaudor/dplyr/) 
+
+```{r echo=FALSE, fig.height=2, fig.width=1}
+# knitr::include_graphics("dplyr_schema.png")
 ```
 
+If you add "grouping" to this list, then nearly everything you want to do is a combination of those verbs/steps. For example, counting
+
+```{r}
+head(cars)
+```
+
+```{r}
+count(cars, speed) |> 
+  head()
+```
+```{r}
+cars |> 
+  group_by(speed) |> 
+  summarize(n = n(), .groups = "drop") |> 
+  head()
+```
+
+
+
+## Load data
 
 ```{r}
 wrds <- dbConnect(
@@ -35,20 +58,36 @@ wrds <- dbConnect(
   dbname = "wrds"
 )
 
+# compustat_raw <- 
+#   dbGetQuery(wrds,
+#   "
+#   SELECT gvkey, datadate, conm, fyear, fyr, ib, ceq, at, sale, sich,
+#          prcc_f * csho as mve
+#   FROM comp.funda
+#   WHERE fyear > 1970 
+#     AND indfmt = 'INDL'
+#     AND datafmt = 'STD'
+#     AND popsrc = 'D'
+#     AND consol = 'C'
+#   ;
+#   "
+# )
+
 compustat_raw <- 
-  dbGetQuery(wrds,
-  "
-  SELECT gvkey, datadate, conm, fyear, fyr, ib, ceq, at, sale, sich,
-         prcc_f * csho as mve
-  FROM comp.funda
-  WHERE fyear > 1970 
-    AND indfmt = 'INDL'
-    AND datafmt = 'STD'
-    AND popsrc = 'D'
-    AND consol = 'C'
-  ;
-  "
-)
+  tbl(wrds, in_schema("comp", "funda")) |> 
+  filter(
+    indfmt == 'INDL',
+    datafmt == 'STD',
+    popsrc == 'D',
+    consol == 'C',
+    fyear > 1970
+  ) |> 
+  mutate(mve = csho * prcc_f) %>%
+  select(
+    gvkey, datadate, conm, fyear, fyr, sich,
+    ib, ceq, sale, at, mve
+  ) |> 
+  collect()
 
 company <- dbGetQuery(wrds, "SELECT gvkey, sic, fic FROM comp.company;")
 dbDisconnect(wrds)
@@ -61,6 +100,9 @@ head(compustat_raw)
 ```{r}
 head(company)
 ```
+
+
+
 
 ## Sample preparation
 
@@ -91,7 +133,7 @@ summary(compustat_raw)
 skimr::skim(compustat_raw)
 ```
 
-Now we merge, clean, and generate key variables. 
+Now we merge, clean, and generate key variables. We are going to dplyr verbs for most of this.
 
 ```{r}
 us_sample_wo_micro <- 
@@ -121,6 +163,7 @@ roe_sample <-
 ```{r}
 summary(roe_sample)
 ```
+
 
 
 ## Plotting
@@ -159,6 +202,16 @@ roe_sample |>
     caption = "Data: Annual RoE of US listed companies with common equity greater $10mn, 1968 - 2019\nRange between -50% and 50% RoE") +
   theme_minimal() +
   theme(panel.grid.minor = element_blank(), 
-        panel.grid.major.x = element_blank())
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey", linetype = "dashed", size = 0.2),
+        axis.line.x = element_line(color = "black"))
+```
+
+
+
+## Exporting the figure
+
+```{r}
+ggsave("../out/roe-plot.pdf", width = 7, height = 6, units = "in")
 ```
 

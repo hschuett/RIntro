@@ -1,6 +1,6 @@
 ---
 title: "Introduction to R"
-subtitle: "A very brief workshop"
+subtitle: "A mini workshop"
 author: "Harm H. Schuett"
 institute: "Tilburg University"
 date: "`r Sys.Date()`"
@@ -23,6 +23,9 @@ class: left, top
 .regression table {
   font-size: 12px;     
 }
+.tiny .remark-code { /*Change made here*/
+  font-size: 50% !important;
+}
 ```
 
 ```{r, echo=FALSE, message=FALSE}
@@ -33,7 +36,9 @@ show_table <- knitr::kable
 ```
 
 .pull-left[
-<!-- ![Image of Momtocat](https://octodex.github.com/images/Fintechtocat.png) -->
+
+Because it is easy:
+
 ```{r, eval=FALSE}
 # a good life motto
 if (sad == TRUE) {
@@ -48,9 +53,9 @@ if you can read this you can R
 --
 
 .pull-right[
-
+Also because it is powerful:
 1. Most common data analysis, statistical analysis language
-1. Open source, free
+1. Free and open source
 1. Extremely comprehensive
 1. Many useful extensions (authoring, publishing) for academics
 1. Vast community
@@ -111,9 +116,7 @@ show_table(long_data)
 head(penguins, 3)
 ```
 
-```{r, echo=FALSE, fig.retina=0.1}
-knitr::include_graphics("https://allisonhorst.github.io/palmerpenguins/man/figures/lter_penguins.png")
-```
+<img src="https://allisonhorst.github.io/palmerpenguins/man/figures/lter_penguins.png" width="40%"/>
 
 
 
@@ -141,6 +144,7 @@ pub_theme <- function(){
 ```
 
 .pull-left[
+.tiny[
 ```{r, warning=FALSE, fig.height=3.5, fig.width=7, dev='svg'}
 pub_theme <- function(){
   theme_minimal() + 
@@ -163,6 +167,7 @@ fig1 <- penguins |>
   )
 ```
 ]
+]
 
 .pull-right[
 ```{r, warning=FALSE, fig.height=4, fig.width=6, dev='svg'}
@@ -170,6 +175,15 @@ fig1
 ```
 
 ]
+
+---
+
+# Big publishing houses use R
+
+[The BBC R Package](https://github.com/bbc/bbplot)
+
+<img src="https://github.com/bbc/bbplot/raw/master/chart_examples/bbplot_example_plots.png" width="80%"/>
+
 
 
 ---
@@ -196,7 +210,32 @@ jtools::export_summs(model_list)
 
 # R excels at communicating results
 
-- Easy to export analyses in various formats ()
+.pull-left[
+.tiny[
+```{r}
+library(officer)
+
+example_table <- head(mtcars, 10)
+
+doc_table <- 
+  read_docx() |> 
+  body_add_par("Level 1 title", 
+               style = "heading 1") |> 
+  body_add_par("  ") |> 
+  body_add_table(example_table, 
+                 style = "Table Professional") |> 
+  body_add_par("  ") |> 
+  body_add_table(example_table, 
+                 style = "Light List Accent 2", 
+                 first_column = TRUE)
+
+print(doc_table, target = "../out/test.docx")
+```
+]
+]
+.pull-right[
+<img src="word-example.png" width="75%"/>
+]
 
 
 ---
@@ -228,7 +267,7 @@ jtools::export_summs(model_list)
 
 - Some closing thoughts on R for reproducible science and robust work-flows
 
-#### Slide and example code can be found at [github.com/hschuett/RIntro](https://github.com/hschuett/RIntro)
+#### Slides and example code can be found at [github.com/hschuett/RIntro](https://github.com/hschuett/RIntro)
 
 ---
 
@@ -237,5 +276,3 @@ class: center, middle
 # On to coding!
 
 Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
-
-The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yihui.org/knitr/), and [R Markdown](https://rmarkdown.rstudio.com).

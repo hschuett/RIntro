@@ -11,13 +11,14 @@ output:
 
 ```{r setup}
 library(tidyverse)
-library(fixest)
+library(haven)  # for reading/writing stata, spss, and sas files
+library(fixest)  # fixed effects, clustered SE, and IV regressions
 ```
 
 ## Data
 
 ```{r}
-trade <- haven::read_dta("../data/trade.dta")
+trade <- read_dta("../data/trade.dta")
 glimpse(trade)
 ```
 
@@ -96,5 +97,3 @@ test <-
 
 head(test)
 ```
-
-
