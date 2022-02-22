@@ -7,7 +7,7 @@
 
         <meta name="author" content="Harm" />
     
-        <meta name="date" content="2022-02-17" />
+        <meta name="date" content="2022-02-22" />
     
     <title>Regression Examples</title>
 
@@ -190,6 +190,7 @@
           <ul>
           <li><a href="#setup">Setup</a></li>
           <li><a href="#data">Data</a></li>
+          <li><a href="#an-example-model-with-fixed-effects">An example model with fixed effects</a></li>
           <li><a href="#regression-examples">Regression examples</a></li>
           <li><a href="#nesting-and-regressions">Nesting and Regressions</a></li>
           </ul>
@@ -197,7 +198,7 @@
         <ul class="authors">
           <li class="divider"></li>
                                 <li><span><i class="glyphicon glyphicon-user"></i> Harm</span></li>
-                                         <li><span><i class="glyphicon glyphicon-calendar"></i> 2022-02-17</span></li>
+                                         <li><span><i class="glyphicon glyphicon-calendar"></i> 2022-02-22</span></li>
                   </ul>     
       </div>
       <div class="book-body fixed">
@@ -218,6 +219,7 @@
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
+<p><em>This code is mostly taken from the intro to the fabulous <a href="https://cran.r-project.org/web/packages/fixest/index.html">fixest package</a></em></p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
@@ -229,11 +231,12 @@
 <pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fixest)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)  <span class="co"># for reading/writing stata, spss, and sas files</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fixest)  <span class="co"># fixed effects, clustered SE, and IV regressions</span></span></code></pre></div>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>trade <span class="ot">&lt;-</span> haven<span class="sc">::</span><span class="fu">read_dta</span>(<span class="st">&quot;../data/trade.dta&quot;</span>)</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>trade <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">&quot;../data/trade.dta&quot;</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(trade)</span></code></pre></div>
 <pre><code>## Rows: 38,325
 ## Columns: 6
@@ -254,8 +257,16 @@
 ## 5     12 [LU]    2 [BE]       3  2007    140. 17379821
 ## 6      2 [BE]   12 [LU]       3  2007    140.  2622254</code></pre>
 </div>
+<div id="an-example-model-with-fixed-effects" class="section level2">
+<h2>An example model with fixed effects</h2>
+<p>The dependent variable of the estimation will be the level of trade between two countries while the independent variable is the geographic distance between the two countries. To obtain the elasticity of geographic distance net of the effects of the four fixed-effects, we estimate the following:</p>
+<p><span class="math display">\[E\left(Trade_{i,j,p,t}\right)=\gamma_{i}^{Exporter}\times\gamma_{j}^{Importer}\times\gamma_{p}^{Product}\times\gamma_{t}^{Year}\times Distance_{ij}^{\beta}\]</span></p>
+<p>In log form this is:</p>
+<p><span class="math display">\[E\left(Trade_{i,j,p,t}\right)=\exp\left(\gamma_{i}^{Exporter}+\gamma_{j}^{Importer}+\gamma_{p}^{Product}+\gamma_{t}^{Year}+\beta\times \ln Distance_{ij}\right)\]</span></p>
+</div>
 <div id="regression-examples" class="section level2">
 <h2>Regression examples</h2>
+<p>This is how we can estimate the model in linear form:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">feols</span>(<span class="fu">log</span>(Euros) <span class="sc">~</span> <span class="fu">log</span>(dist_km) <span class="sc">|</span> Origin <span class="sc">+</span> Destination <span class="sc">+</span> Product <span class="sc">+</span> Year, <span class="at">data =</span> trade)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m1, <span class="at">vcov =</span> <span class="sc">~</span> Origin <span class="sc">+</span> Year)</span></code></pre></div>
 <pre><code>## OLS estimation, Dep. Var.: log(Euros)
@@ -287,7 +298,9 @@
 ## S.E.: Clustered         by: Origin  by: Orig. &amp; Dest.
 ## Observations                38,325             38,325
 ## R2                         0.70558            0.70558
-## Within R2                  0.21932            0.21932</code></pre>
+## Within R2                  0.21932            0.21932
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>model_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>all_FEs  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Year&quot;</span>, <span class="st">&quot;Destination&quot;</span>, <span class="st">&quot;Origin&quot;</span>)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>){</span>
@@ -310,6 +323,7 @@
 ## Observations                38,325             38,325             38,325
 ## R2                         0.14169            0.14266            0.27227
 ## Within R2                       --            0.14188            0.18419
+## 
 ##                            model 4
 ## Dependent Var.:         log(Euros)
 ##                                   
@@ -323,7 +337,9 @@
 ## S.E.: Clustered  by: Orig. &amp; Dest.
 ## Observations                38,325
 ## R2                         0.50565
-## Within R2                  0.13259</code></pre>
+## Within R2                  0.13259
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
 <div id="nesting-and-regressions" class="section level2">
 <h2>Nesting and Regressions</h2>
@@ -361,13 +377,13 @@
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## RMSE: 1.72802     Adj. R2: 0.703335
 ##                 Within R2: 0.221316</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> </span>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fitted_trade <span class="ot">&lt;-</span> </span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  nested_by_year <span class="sc">|&gt;</span> </span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>fit) <span class="sc">|&gt;</span> </span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="fu">c</span>(data, preds)) <span class="sc">|&gt;</span> </span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">predicted_Euros =</span> <span class="fu">exp</span>(preds))</span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(test)</span></code></pre></div>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fitted_trade)</span></code></pre></div>
 <pre><code>## # A tibble: 6 × 8
 ##    Year Destination    Origin Product dist_km    Euros preds predicted_Euros
 ##   &lt;dbl&gt;   &lt;dbl+lbl&gt; &lt;dbl+lbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;           &lt;dbl&gt;

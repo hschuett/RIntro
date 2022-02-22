@@ -7,6 +7,8 @@ output:
     highlight: kate
 ---
 
+*This code is mostly taken from the intro to the fabulous [fixest package](https://cran.r-project.org/web/packages/fixest/index.html)*
+
 ## Setup
 
 ```{r setup}
@@ -27,8 +29,19 @@ head(trade)
 ```
 
 
+## An example model with fixed effects
+
+The dependent variable of the estimation will be the level of trade between two countries while the independent variable is the geographic distance between the two countries. To obtain the elasticity of geographic distance net of the effects of the four fixed-effects, we estimate the following:
+
+$$E\left(Trade_{i,j,p,t}\right)=\gamma_{i}^{Exporter}\times\gamma_{j}^{Importer}\times\gamma_{p}^{Product}\times\gamma_{t}^{Year}\times Distance_{ij}^{\beta}$$
+
+In log form this is: 
+
+$$E\left(Trade_{i,j,p,t}\right)=\exp\left(\gamma_{i}^{Exporter}+\gamma_{j}^{Importer}+\gamma_{p}^{Product}+\gamma_{t}^{Year}+\beta\times \ln Distance_{ij}\right)$$
 
 ## Regression examples
+
+This is how we can estimate the model in linear form:
 
 ```{r}
 m1 <- feols(log(Euros) ~ log(dist_km) | Origin + Destination + Product + Year, data = trade)
@@ -89,11 +102,11 @@ nested_by_year$fit[[2]]
 ```
 
 ```{r}
-test <- 
+fitted_trade <- 
   nested_by_year |> 
   select(-fit) |> 
   unnest(c(data, preds)) |> 
   mutate(predicted_Euros = exp(preds))
 
-head(test)
+head(fitted_trade)
 ```

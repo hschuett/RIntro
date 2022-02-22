@@ -1,5 +1,5 @@
 ---
-title: "R Intro example of tidyverse verbs and plotting"
+title: "Example 1. Tidyverse verbs and plotting"
 date: "`r Sys.Date()`"
 author: "Harm"
 output:
@@ -23,25 +23,20 @@ library(ggridges)
 image [source](http://perso.ens-lyon.fr/lise.vaudor/dplyr/) 
 
 ```{r echo=FALSE, fig.height=2, fig.width=1}
-# knitr::include_graphics("dplyr_schema.png")
+knitr::include_graphics("dplyr_schema.png")
 ```
 
-If you add "grouping" to this list, then nearly everything you want to do is a combination of those verbs/steps. For example, counting
+If you add "join" and grouping" to this list, then 98% of everything you want to do is a combination of those verbs/steps. For example, *counting*
 
-```{r}
-head(cars)
-```
+    cars |> 
+      count(speed) 
 
-```{r}
-count(cars, speed) |> 
-  head()
-```
-```{r}
-cars |> 
-  group_by(speed) |> 
-  summarize(n = n(), .groups = "drop") |> 
-  head()
-```
+is the same as:
+
+    cars |> 
+      group_by(speed) |> 
+      summarize(n = n()) |> 
+      ungroup()
 
 
 
@@ -133,7 +128,7 @@ summary(compustat_raw)
 skimr::skim(compustat_raw)
 ```
 
-Now we merge, clean, and generate key variables. We are going to dplyr verbs for most of this.
+Now we merge, clean, and generate key variables. We are going to use dplyr verbs for most of this.
 
 ```{r}
 us_sample_wo_micro <- 

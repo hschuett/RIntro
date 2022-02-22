@@ -15,5 +15,6 @@ To follow along you need the following packages installed:
       "jtools",
       "xaringan",
       "rmdformats",
-      "xaringanExtra"
+      "xaringanExtra",
+      "skimr"
     ))

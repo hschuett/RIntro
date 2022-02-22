@@ -116,7 +116,7 @@ show_table(long_data)
 head(penguins, 3)
 ```
 
-<img src="https://allisonhorst.github.io/palmerpenguins/man/figures/lter_penguins.png" width="40%"/>
+<img src="https://allisonhorst.github.io/palmerpenguins/man/figures/lter_penguins.png" width="35%"/>
 
 
 
@@ -124,6 +124,8 @@ head(penguins, 3)
 ---
 
 # R shines at explorative and pub. visuals
+
+.footnote[from the [ggdensity doc](https://jamesotto852.github.io/ggdensity/)]
 
 ```{r, warning=FALSE, fig.height=3.5, fig.width=7, dev='svg'}
 penguins |> 
@@ -175,6 +177,41 @@ fig1
 ```
 
 ]
+
+---
+# Easy to add a animations too
+
+.pull-left[
+
+.footnote[from the [gganimate doc](https://gganimate.com/)]
+.tiny[
+```{r gganim}
+library(gapminder)
+library(gganimate)
+ap1 <- 
+  ggplot(gapminder, aes(x = gdpPercap, y = lifeExp, 
+                        size = pop, colour = country)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  scale_colour_manual(values = country_colors) +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  facet_wrap(~continent) +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', 
+       x = 'GDP per capita', 
+       y = 'life expectancy') +
+  transition_time(year) +
+  ease_aes('linear')
+```
+]
+]
+
+.pull-right[
+```{r, fig.height=4}
+ap1
+```
+]
+
 
 ---
 
@@ -251,7 +288,7 @@ print(doc_table, target = "../out/test.docx")
 
 --
 
-- [RMarkdown](https://rmarkdown.rstudio.com/) powers a rich set of communication tools: apps, dashboards, websites, reports
+- [RMarkdown](https://rmarkdown.rstudio.com/) powers a rich set of communication tools: [books](https://mixtape.scunning.com/teaching-resources.html), apps, dashboards, websites, reports
 
 --
 
