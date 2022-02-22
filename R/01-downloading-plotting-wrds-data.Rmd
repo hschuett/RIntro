@@ -10,15 +10,15 @@ output:
 ## Setup
 
 ```{r setup}
-library(tidyverse)
-library(RPostgres)
-library(dbplyr)
-library(ggridges)
+library(tidyverse) # plotting and data wrangling 
+library(RPostgres) # drivers for access Postgres SQL servers
+library(dbplyr)    # translates dplyr verbs into SQL 
+library(ggridges)  # additional plotting options
 ```
 
 
 
-## The gramma of data manipulation
+## The grammar of data manipulation
 
 image [source](http://perso.ens-lyon.fr/lise.vaudor/dplyr/) 
 
@@ -28,15 +28,30 @@ knitr::include_graphics("dplyr_schema.png")
 
 If you add "join" and grouping" to this list, then 98% of everything you want to do is a combination of those verbs/steps. For example, *counting*
 
-    cars |> 
-      count(speed) 
+    penguins |> 
+      count(species, name = "n_penguins") 
 
 is the same as:
 
-    cars |> 
-      group_by(speed) |> 
-      summarize(n = n()) |> 
+    penguins |> 
+      group_by(species) |> 
+      summarize(n_penguins = n()) |> 
       ungroup()
+
+## A note on pipes ( |> or %>% )
+
+|> (or %>%) do "take whatever is left of |>  and put it as a first argument in what is right of |>". I think it makes for much more readable, chunked code
+
+    function1(function2(function3(data)))
+
+becomes
+
+    data |> 
+      function3() |> 
+      function2() |> 
+      function1()
+    
+which, to me, shows the order of execution and the separate steps in a more obvious fashion. Let's work on actual data though
 
 
 
@@ -164,8 +179,9 @@ summary(roe_sample)
 ## Plotting
 
 ```{r}
-tiu_colors <- list(
+tiu_colors <- c(
   "lightblue" = "#008EC6",
+  "blue" = "#003366",
   "gold" = "#CC9933"
 )
 tiu_colors
@@ -194,7 +210,7 @@ roe_sample |>
   labs(
     y = NULL,
     x = "Return on Equity",
-    caption = "Data: Annual RoE of US listed companies with common equity greater $10mn, 1968 - 2019\nRange between -50% and 50% RoE") +
+    caption = "Data: Annual RoE of US listed companies with common equity greater $10mn, 1968 - 2020\nRange between -50% and 50% RoE") +
   theme_minimal() +
   theme(panel.grid.minor = element_blank(), 
         panel.grid.major.x = element_blank(),

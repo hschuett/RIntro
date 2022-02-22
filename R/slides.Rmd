@@ -108,8 +108,19 @@ show_table(long_data)
 ```
 ]
 
----
 
+
+---
+# R shines at explorative and pub. visuals
+
+![The workflow](https://d33wubrfki0l68.cloudfront.net/571b056757d68e6df81a3e3853f54d3c76ad6efc/32d37/diagrams/data-science.png)
+.footnote[
+[1] Source: Hadley Wickham and Garrett Grolemund. 2017. [R for Data Science](https://r4ds.had.co.nz/introduction.html). O’Reilly Media, Inc.
+]
+
+
+
+---
 # R shines at explorative and pub. visuals
 
 ```{r}
@@ -223,6 +234,18 @@ ap1
 
 
 
+
+---
+# R shines at models
+
+![The workflow](https://d33wubrfki0l68.cloudfront.net/571b056757d68e6df81a3e3853f54d3c76ad6efc/32d37/diagrams/data-science.png)
+.footnote[
+[1] Source: Hadley Wickham and Garrett Grolemund. 2017. [R for Data Science](https://r4ds.had.co.nz/introduction.html). O’Reilly Media, Inc.
+]
+
+
+
+
 ---
 class: regression
 # R is the language of Stats departments
@@ -243,9 +266,23 @@ model_list <- map(1:3, ~lm(gen_regeq(.), data = penguins))
 jtools::export_summs(model_list)
 ```
 
----
 
-# R excels at communicating results
+
+
+
+
+---
+# R shines at communication
+
+![The workflow](https://d33wubrfki0l68.cloudfront.net/571b056757d68e6df81a3e3853f54d3c76ad6efc/32d37/diagrams/data-science.png)
+.footnote[
+[1] Source: Hadley Wickham and Garrett Grolemund. 2017. [R for Data Science](https://r4ds.had.co.nz/introduction.html). O’Reilly Media, Inc.
+]
+
+
+
+---
+# Easy to pipe directly into Word, Powerpoint, LaTeX documents
 
 .pull-left[
 .tiny[
